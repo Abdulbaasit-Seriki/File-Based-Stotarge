@@ -53,12 +53,51 @@ class Users {
 		const users = await this.getAllUsers();
 		return users.find(user => user.id === id);
 	}
+
+	async delete(id) {
+		const records = await this.getAllUsers();
+		const filterdRecords = records.filter(record => record.id !== id);
+
+		await this.saveUser(filterdRecords);
+	}
+
+	async update(id, options) {
+		const records = await this.getAllUsers();
+		const record = records.find(record => record.id === id);
+
+		if(!record) {
+			throw new Error(`Record with ID of ${id} not found `);
+		}
+
+		Object.assign(record, options);
+		return await this.saveUser(records);
+	}
+
+	async getByFilters(options) {
+
+		const records = await this.getAllUsers();
+
+		for(let record of records) {
+			let found = true;
+
+			for(let key in options) {
+
+				if (record[key] !== options[key]) {
+					found = false;
+				}
+			}
+
+			if (found === true) {
+				return record;
+			}
+		}
+	}
 }
 
 const test = async () => {
 
 	const newUser = new Users('users.json');
-	const user = await newUser.getById("e410738a5ccc");
-	console.log(user);
+	const users = await newUser.getByFilters( {email: "they@gmail.com"} );
+	console.log(users);
 }
 test();
