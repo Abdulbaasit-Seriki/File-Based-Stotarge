@@ -1,4 +1,5 @@
 const fs = require('fs');
+const crypto = require('crypto');
 
 class Users {
 
@@ -15,29 +16,49 @@ class Users {
 			fs.accessSync(this.filename);
 		}
 		catch(err) {
-			fs.writeFileSync(this.filename, '[]');
+			fs.writeFileSync(this.filename, "[]");
 		}
 	}
 
 	async getAllUsers ()  {
-		return JSON.parse(await fs.promises.readFile(this.filename, {
-			encoding: 'utf8'
-		}));
-	},
+		try {
+			return JSON.parse(await fs.promises.readFile(this.filename, {
+				encoding: 'utf8'
+			}));
+		}
+		catch (err) {
+			console.log(err);
+		}
+	}
 
 	async createUser (options) {
-		// Get the contents of the file
-		const fileContent = await this.getAllUsers;
-		// Add the new data to it
+
+		options.id = this.generateId();
+
+		const fileContent = await this.getAllUsers();
 		fileContent.push(options);
 
-		await fs.promises.writeFile(this.filename, JSON.stringify(fileContent));
+		await this.saveUser(fileContent);
+	}
+
+	async saveUser (data) {
+		await fs.promises.writeFile(this.filename, JSON.stringify(data, null, 2));
+	}
+
+	generateId() {
+		return crypto.randomBytes(6).toString('hex');
+	}
+
+	async getById(id) {
+		const users = await this.getAllUsers();
+		return users.find(user => user.id === id);
 	}
 }
 
 const test = async () => {
+
 	const newUser = new Users('users.json');
-	await newUser.createUser({name: hey, email: test@gmail.com});
-	console.log(await newUser.getAllUsers());
+	const user = await newUser.getById("e410738a5ccc");
+	console.log(user);
 }
 test();
