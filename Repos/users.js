@@ -1,7 +1,10 @@
 const fs = require('fs');
 const crypto = require('crypto');
+const util = require('util');
 
-class Users {
+const scrypt = util.promisify(crypto.scrypt);
+
+class UsersRepo {
 
 	constructor(filename) {
 
@@ -35,10 +38,27 @@ class Users {
 
 		options.id = this.generateId();
 
+		const salt = crypto.randomBytes(9).toString('hex');
+		const derivedKey = await scrypt(options.password, salt, 64);
+
+		const option = {
+			...options,
+			password: `${derivedKey.toString('hex')}.${salt}`
+		};
+
 		const fileContent = await this.getAllUsers();
-		fileContent.push(options);
+		fileContent.push(option);
 
 		await this.saveUser(fileContent);
+
+		return option;
+	}
+
+	async comparePasswords(savedPswrd, suppliedPswrd) {
+		const [hashedPswrd, savedSalt] = savedPswrd.split('.');
+
+		const newHashBuffer = await scrypt(suppliedPswrd, savedSalt, 64);
+		return hashedPswrd === newHashBuffer.toString('hex');
 	}
 
 	async saveUser (data) {
@@ -94,10 +114,4 @@ class Users {
 	}
 }
 
-const test = async () => {
-
-	const newUser = new Users('users.json');
-	const users = await newUser.getByFilters( {email: "they@gmail.com"} );
-	console.log(users);
-}
-test();
+module.exports = new UsersRepo('users.json');
