@@ -1,0 +1,28 @@
+{
+  "name": "mini-ecommerce-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "cookie-session": "^1.3.3",
+    "express": "^4.17.1",
+    "express-validator": "^6.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abdulbaasit-Seriki/File-Based-Stotarge.git"
+  },
+  "author": "Abdulbaasit",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Abdulbaasit-Seriki/File-Based-Stotarge/issues"
+  },
+  "homepage": "https://github.com/Abdulbaasit-Seriki/File-Based-Stotarge#readme"
+}
