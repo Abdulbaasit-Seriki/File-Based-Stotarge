@@ -1,39 +1,42 @@
 const UsersRepo = require('../Repos/users.js');
-const signUpTemplate = require('../views/admin/signup.js');
-const signInTemplate = require('../views/admin/signin.js');
+const { check, validationResult } = require('express-validator');
 
-exports.showSignupForm = ('/signup', (req, res) => {
-	// res.send(signUpTemplate({ req }));
-	res.send(`
-	    <div>
-	    	Current User ID = ${req.session.userId}
-		      <form method="POST">
-		        <input name="email" placeholder="email" />
-		        <input name="password" placeholder="password" />
-		        <input name="passwordConfirmation" placeholder="password confirmation" />
-		        <button>Sign Up</button>
-		      </form>
-	    </div>
-  `);
+exports.showSignupForm = ('/signup', (req, res, next) => {
+	res.render('admin/signup.ejs', {req});
 });
 
-exports.signUp = ('/signup', async (req, res) => {
-	const { email, password, passwordConfirmation } = req.body;
+exports.signUp = ('/signup',
+	 [
+		check('email').trim().normalizeEmail().isEmail(),
+		check('password').trim().isLength({ min: 6, max: 40 }),
+		check('passwordConfirmation').trim().isLength({ min: 6, max: 40 })
+	],
+	 async (req, res, next) => {
 
-	const foundUser = await UsersRepo.getByFilters({email});
-	if (foundUser) {
-		res.send(`This Email has been associated with an account, kindly pick another`);
-	}
+	 	try {	
+	 		const errors = validationResult(req);
+			console.log(errors); 
+			
+			const { email, password, passwordConfirmation } = req.body;
 
-	if (password !== passwordConfirmation) {
-		res.send(`Passwords must match`)
-	}
+			const foundUser = await UsersRepo.getByFilters({email});
+			if (foundUser) {
+				res.send(`This Email has been associated with an account, kindly pick another`);
+			}
 
-	const newUser = UsersRepo.createUser({email, password});
-	// We're using the ID of the user to set the cookie encryption key
-	req.session.userId = newUser.id;
+			if (password !== passwordConfirmation) {
+				res.send(`Passwords must match`)
+			}
 
-	res.send(`Account Created Successfully`);
+			const newUser = UsersRepo.createUser({email, password});
+			// We're using the ID of the user to set the cookie encryption key
+			req.session.userId = newUser.id;
+
+			res.send(`Account Created Successfully`);
+	 	}
+	 	catch(err) {
+	 		next(err);
+	 	}
 })
 
 exports.signOut = ('/signout', (req, res) => {
@@ -42,17 +45,7 @@ exports.signOut = ('/signout', (req, res) => {
 });
 
 exports.showSignInForm = ('/signin', (req, res) => {
-	// res.send(signInTemplate({ req }));
-	res.send(`
-	   <div>
-	    Current User ID = ${req.session.userId}
-	      <form method="POST">
-	        <input name="email" placeholder="email" />
-	        <input name="password" placeholder="password" />
-	        <button>Sign In</button>
-	      </form>
-	    </div>
-  `);
+	res.render('admin/signin.ejs', {req});
 });
 
 exports.signIn = ('/signin', async (req, res) => {
