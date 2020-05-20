@@ -1,16 +1,17 @@
 const UsersRepo = require('../Repos/users.js');
 const { check, validationResult } = require('express-validator');
+const { validateEmail, validatePassword, confirmPassword } = require('../routes/admin/validators.js');
 
 exports.showSignupForm = ('/signup', (req, res, next) => {
-	res.render('admin/signup.ejs', {req});
+	res.render('admin/signup.ejs', { req });
 });
 
 exports.signUp = ('/signup',
-	 [
-		check('email').trim().normalizeEmail().isEmail(),
-		check('password').trim().isLength({ min: 6, max: 40 }),
-		check('passwordConfirmation').trim().isLength({ min: 6, max: 40 })
-	],
+	//  [
+	// 	validateEmail,
+	// 	validatePassword,
+	// 	confirmPassword
+	// ],
 	 async (req, res, next) => {
 
 	 	try {	
