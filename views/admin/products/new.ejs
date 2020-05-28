@@ -1,0 +1,18 @@
+<%- include('../../partials/header') -%>
+
+<% const getErrors = (errors, property) => { %>
+    <% try { %>
+      <% return errors.mapped()[property].msg %>
+    <% } catch(err) { %>
+        <% return ''; %>
+      <% } %>
+<% } %>
+
+	<form method="POST">
+		<input name="title" placeholder="Title" />
+		<input name="price" placeholder="Price" />
+		<input type="file" name="image" />
+		<button>Create</button>
+	</form>
+
+<%- include('../../partials/footer') -%>

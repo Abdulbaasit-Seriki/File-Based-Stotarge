@@ -3,7 +3,12 @@ const router = express.Router();
 const { check, validationResult } = require('express-validator');
 const UsersRepo = require('../../Repos/users.js');
 
-const { validateEmail, validatePassword, confirmPassword } = require('./validators.js');
+const { validateEmail, 
+		validatePassword, 
+		confirmPassword,
+		confirmEmailExistence,
+		confirmPasswordExistenceForUser
+  } = require('./validators.js');
 
 const {
 	showSignupForm,
@@ -12,6 +17,14 @@ const {
 	showSignInForm,
 	signIn
 } = require('../../controllers/auth.js');
+
+let errors;
+
+router.get('/signup', (req, res) => {
+	errors = null;
+	res.render('admin/signup.ejs', {errors});
+});
+
 
 router.post('/signup',
 	 [
@@ -22,8 +35,8 @@ router.post('/signup',
 	 async (req, res) => {
 
 	 	try {	
-	 		const errors = validationResult(req);
-	 		console.log(errors);
+	 		errors = validationResult(req);
+	 		
 			if (!errors.isEmpty()) {
 				return res.render('admin/signup.ejs', { errors })
 			}
@@ -39,10 +52,34 @@ router.post('/signup',
 	 	catch(err) {
 	 		next(err);
 	 	}
-})
+});
 
-router.route('/signup').get(showSignupForm);
-router.route('/signin').get(showSignInForm).post(signIn);
+router.get('/signin', (req, res) => {
+	errors = null;
+	res.render('admin/signin.ejs', { req, errors });
+});
+
+router.post('/signin', [
+			confirmEmailExistence,
+			confirmPasswordExistenceForUser
+		], async (req, res) => {
+
+	errors = validationResult(req);
+
+	if (!errors.isEmpty()) {
+		return res.render('admin/signin.ejs', { req, errors });
+	}
+
+	const { email } = req.body;
+
+	const user = await UsersRepo.getByFilters({email});
+
+	req.session.userId = user.id;
+
+	res.send(`You are logged in with an ID of ${req.session.userId}`);
+});
+
+
 router.route('/signout').get(signOut);
 
 module.exports = router;

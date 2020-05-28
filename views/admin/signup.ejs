@@ -1,27 +1,50 @@
 <%- include('../partials/header') -%>
-	<% const getErrors = (error, property) => { %>
-		<% try { %>
-			<% return errors.mapped()[property].msg %>
-		<% } catch(err) { %>
-				<% return ''; %>
-			<% } %>
-	<% } %>
-	
-	    <div>
-		      <form method="POST">
-		        <input name="email" placeholder="email" />
-		        <% if(errors) { %>
-		        	<%= getErrors(errors, 'email') %>
-		        <% } %>
-		        <input name="password" placeholder="password" />
-		         <% if(errors) { %>
-		        	<%= getErrors(errors, 'password') %>
-		        <% } %>
-		        <input name="passwordConfirmation" placeholder="password confirmation" />
-		        <% if(errors) { %>
-		        	<%= getErrors(errors, 'passwordConfirmation') %>
-		        <% } %>
-		        <button>Sign Up</button>
-		      </form>
-	    </div>
+<%- include('../partials/helpers') -%>
+
+<% const getErrors = (errors, property) => { %>
+    <% try { %>
+      <% return errors.mapped()[property].msg %>
+    <% } catch(err) { %>
+        <% return ''; %>
+      <% } %>
+<% } %>
+
+ <div class="container">
+        <div class="columns is-centered">
+          <div class="column is-one-quarter">
+            <form method="POST">
+              <h1 class="title">Sign Up</h1>
+              <div class="field">
+                <label class="label">Email</label>
+                <input required class="input" placeholder="Email" name="email" />
+                <p class="help is-danger">
+                	<% if(errors) { %>
+			      		<%= getErrors(errors, 'email') %>
+			      	<% } %>
+                </p>
+              </div>
+              <div class="field">
+                <label class="label">Password</label>
+                <input required class="input" placeholder="Password" name="password" type="password" />
+                <p class="help is-danger">
+                	<% if(errors) { %>
+			      		<%= getErrors(errors, 'password') %>
+			      	<% } %>
+                </p>
+              </div>
+              <div class="field">
+                <label class="label">Password Confirmation</label>
+                <input required class="input" placeholder="Password Confirmation" name="passwordConfirmation" type="password" />
+                <p class="help is-danger">
+                	<% if(errors) { %>
+			      		<%= getErrors(errors, 'passwordConfirmation') %>
+			      	<% } %>
+                </p>
+              </div>
+              <button class="button is-primary">Submit</button>
+            </form>
+            <a href="/signin">Have an account? Sign In</a>
+          </div>
+        </div>
+      </div>
 <%- include('../partials/footer') -%>
