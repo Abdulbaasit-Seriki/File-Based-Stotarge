@@ -19,7 +19,7 @@ app.set('view engine', "ejs");
 
 // Mount Routers
 app.use(authRoute);
-app.use('/admin/products', productsRoute);
+app.use(productsRoute);
 
 const port = process.env.PORT || 3000;
 app.listen(port, console.log(`Server Running on port ${port}`))

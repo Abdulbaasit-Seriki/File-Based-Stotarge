@@ -46,7 +46,7 @@ exports.signOut = ('/signout', (req, res) => {
 });
 
 exports.showSignInForm = ('/signin', (req, res) => {
-	res.render('admin/signin.ejs', {req});
+	res.render('admin/signin.ejs');
 });
 
 exports.signIn = ('/signin', async (req, res) => {

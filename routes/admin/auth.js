@@ -1,23 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
-const UsersRepo = require('../../Repos/users.js');
 
+const UsersRepo = require('../../Repos/users.js');
 const { validateEmail, 
 		validatePassword, 
 		confirmPassword,
 		confirmEmailExistence,
 		confirmPasswordExistenceForUser
   } = require('./validators.js');
-
-const {
-	showSignupForm,
-	signUp,
-	signOut,
-	showSignInForm,
-	signIn
-} = require('../../controllers/auth.js');
-
+const { handleValidationErrors } = require('./middlewares');
 let errors;
 
 router.get('/signup', (req, res) => {
@@ -32,14 +24,10 @@ router.post('/signup',
 		validatePassword,
 		confirmPassword
 	],
+	handleValidationErrors('admin/products/new'),
 	 async (req, res) => {
 
 	 	try {	
-	 		errors = validationResult(req);
-	 		
-			if (!errors.isEmpty()) {
-				return res.render('admin/signup.ejs', { errors })
-			}
 			
 			const { email, password, passwordConfirmation } = req.body;
 
@@ -47,7 +35,7 @@ router.post('/signup',
 			// We're using the ID of the user to set the cookie encryption key
 			req.session.userId = newUser.id;
 
-			res.send(`Account Created Successfully`);
+			res.redirect('/admin/products');
 	 	}
 	 	catch(err) {
 	 		next(err);
@@ -56,19 +44,15 @@ router.post('/signup',
 
 router.get('/signin', (req, res) => {
 	errors = null;
-	res.render('admin/signin.ejs', { req, errors });
+	res.render('admin/signin.ejs', { errors });
 });
 
 router.post('/signin', [
 			confirmEmailExistence,
 			confirmPasswordExistenceForUser
-		], async (req, res) => {
-
-	errors = validationResult(req);
-
-	if (!errors.isEmpty()) {
-		return res.render('admin/signin.ejs', { req, errors });
-	}
+		], 
+		handleValidationErrors('admin/products/new'),
+		async (req, res) => {
 
 	const { email } = req.body;
 
@@ -76,10 +60,13 @@ router.post('/signin', [
 
 	req.session.userId = user.id;
 
-	res.send(`You are logged in with an ID of ${req.session.userId}`);
+	res.redirect('/admin/products');
 });
 
 
-router.route('/signout').get(signOut);
+router.get('/signout', (req, res) => {
+	req.session = null;
+	res.send(`You have been logged out`);
+});
 
 module.exports = router;

@@ -1,21 +1,36 @@
 const express = require('express');
+const multer = require('multer');
+
+const productsRepo = require('../../Repos/products');
+const { validateProductTitle, validateProductPrice } = require('./validators');
+const { handleValidationErrors } = require('./middlewares');
+
 const router = express.Router();
-const { validationResult } = require('express-validator');
-const ProductsRepo = require('../../Repos/products.js');
-const { validateProductTitle, validateProductPrice } = require('./validators.js');
+const upload = multer({ storage: multer.memoryStorage() });
+let errors;
 
-router.get('/', (req, res) => {
-
+router.get('/admin/products', async (req, res) => {
+	const products = await productsRepo.getAll();
+	res.render('admin/products/index', { products });
 });
 
-router.get('/new', (req, res) => {
-	res.render('admin/products/new');
+router.get('/admin/products/new', (req, res) => {
+  res.render('admin/products/new', {errors: null});
 });
 
-router.post('/new', [validateProductTitle, validateProductPrice], (req, res) => {
-	const errors = validationResult(req);
-	console.log(errors);
-	res.send(`Submitted`);
-});
+router.post(
+  '/admin/products/new',
+  upload.single('image'),
+  [validateProductTitle, validateProductPrice],
+  handleValidationErrors('admin/products/new'),
+  async (req, res) => {
+    
+    const image = req.file.buffer.toString('base64');
+    const { title, price } = req.body;
+    await productsRepo.create({ title, price, image });
+
+    res.redirect('/admin/products');
+  }
+);
 
 module.exports = router;
